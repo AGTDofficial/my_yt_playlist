@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Segment Saver</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.youtube.com/iframe_api" defer></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-16">
+                        <h1 class="logo">🎥 YouTube Segment Saver</h1>
+                        <nav class="nav">
+                            <button class="nav-btn" data-tab="segments">Segments</button>
+                            <button class="nav-btn" data-tab="playlists">Playlists</button>
+                        </nav>
+                    </div>
+                    <div class="flex items-center gap-16">
+                        <button id="darkModeToggle" class="btn btn--outline">🌙</button>
+                        <div class="user-profile">
+                            <span id="userName">User</span>
+                            <button id="userSettings" class="btn btn--outline">⚙️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- YouTube Player Section -->
+                <section class="player-section">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="player-container">
+                                <div id="ytPlayer" class="youtube-player"></div>
+                                <div class="player-controls">
+                                    <div class="current-segment">
+                                        <span id="currentSegmentName">No segment playing</span>
+                                    </div>
+                                    <div class="player-buttons">
+                                        <button id="prevSegment" class="btn btn--secondary">⏮️ Previous</button>
+                                        <button id="nextSegment" class="btn btn--secondary">⏭️ Next</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Segments Tab -->
+                <section id="segmentsTab" class="tab-content active">
+                    <!-- Add Segment Form -->
+                    <div class="card mb-8">
+                        <div class="card__header">
+                            <h2>Add New Segment</h2>
+                        </div>
+                        <div class="card__body">
+                            <form id="segmentForm" class="segment-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="videoUrl">YouTube URL</label>
+                                        <input type="url" id="videoUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="segmentName">Segment Name</label>
+                                        <input type="text" id="segmentName" class="form-control" placeholder="My awesome segment" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label" for="startTime">Start Time (seconds)</label>
+                                        <input type="number" id="startTime" class="form-control" min="0" placeholder="30" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="endTime">End Time (seconds)</label>
+                                        <input type="number" id="endTime" class="form-control" min="1" placeholder="90" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn--primary">Save Segment</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Segments List -->
+                    <div class="card">
+                        <div class="card__header">
+                            <h2>Your Segments</h2>
+                            <div class="header-actions">
+                                <button id="exportSegments" class="btn btn--outline">Export</button>
+                                <input type="file" id="importSegments" accept=".json" style="display: none;">
+                                <button id="importSegmentsBtn" class="btn btn--outline">Import</button>
+                            </div>
+                        </div>
+                        <div class="card__body">
+                            <div id="segmentsList" class="segments-list">
+                                <div class="empty-state">
+                                    <p>No segments saved yet. Add your first segment above!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Playlists Tab -->
+                <section id="playlistsTab" class="tab-content">
+                    <!-- Create Playlist Form -->
+                    <div class="card mb-8">
+                        <div class="card__header">
+                            <h2>Create New Playlist</h2>
+                        </div>
+                        <div class="card__body">
+                            <form id="playlistForm" class="playlist-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="playlistName">Playlist Name</label>
+                                    <input type="text" id="playlistName" class="form-control" placeholder="My awesome playlist" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Select Segments</label>
+                                    <div id="segmentSelection" class="segment-selection">
+                                        <p class="text-secondary">No segments available. Create some segments first!</p>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn--primary">Create Playlist</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Playlists List -->
+                    <div class="card">
+                        <div class="card__header">
+                            <h2>Your Playlists</h2>
+                        </div>
+                        <div class="card__body">
+                            <div id="playlistsList" class="playlists-list">
+                                <div class="empty-state">
+                                    <p>No playlists created yet. Create your first playlist above!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Share Modal -->
+        <div id="shareModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="shareTitle">Share Segment</h3>
+                    <button id="closeShareModal" class="btn btn--outline">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Share Link</label>
+                        <div class="share-input-group">
+                            <input type="text" id="shareLink" class="form-control" readonly>
+                            <button id="copyLink" class="btn btn--primary">Copy</button>
+                        </div>
+                    </div>
+                    <div class="share-actions">
+                        <button class="btn btn--secondary share-social" data-platform="twitter">Twitter</button>
+                        <button class="btn btn--secondary share-social" data-platform="facebook">Facebook</button>
+                        <button class="btn btn--secondary share-social" data-platform="reddit">Reddit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Settings Modal -->
+        <div id="userModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>User Settings</h3>
+                    <button id="closeUserModal" class="btn btn--outline">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="userNameInput">Display Name</label>
+                        <input type="text" id="userNameInput" class="form-control" placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <h4>Data Management</h4>
+                        <div class="data-actions">
+                            <button id="backupData" class="btn btn--secondary">Backup All Data</button>
+                            <button id="clearData" class="btn btn--outline">Clear All Data</button>
+                        </div>
+                    </div>
+                    <button id="saveUserSettings" class="btn btn--primary">Save Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

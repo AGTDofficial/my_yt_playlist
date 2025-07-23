@@ -1,0 +1,19 @@
+{
+  "name": "youtube-segment-saver",
+  "version": "1.0.0",
+  "description": "Complete YouTube segment management application",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "python3 -m http.server 8080"
+  },
+  "keywords": ["youtube", "segments", "playlist", "video", "bookmarks"],
+  "author": "YouTube Segment Saver",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "repository": {
+    "type": "local",
+    "url": "."
+  }
+}
