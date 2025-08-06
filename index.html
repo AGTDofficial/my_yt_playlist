@@ -12,22 +12,20 @@
         <!-- Header -->
         <header class="header">
             <div class="container">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-16">
-                        <h1 class="logo">🎥 YouTube Segment Saver</h1>
-                        <nav class="nav">
-                            <button class="nav-btn" data-tab="segments">Segments</button>
-                            <button class="nav-btn" data-tab="playlists">Playlists</button>
-                        </nav>
-                    </div>
-                    <div class="flex items-center gap-16">
-                        <button id="darkModeToggle" class="btn btn--outline">🌙</button>
+                <div class="header-top">
+                    <h1 class="logo">🎥 YouTube Segment Saver</h1>
+                    <div class="header-controls">
+                        <button id="darkModeToggle" class="btn btn--outline" aria-label="Toggle dark mode">🌙</button>
                         <div class="user-profile">
                             <span id="userName">User</span>
-                            <button id="userSettings" class="btn btn--outline">⚙️</button>
+                            <button id="userSettings" class="btn btn--outline" aria-label="User settings">⚙️</button>
                         </div>
                     </div>
                 </div>
+                <nav class="nav">
+                    <button class="nav-btn" data-tab="segments">Segments</button>
+                    <button class="nav-btn" data-tab="playlists">Playlists</button>
+                </nav>
             </div>
         </header>
 
@@ -59,33 +57,41 @@
                     <!-- Add Segment Form -->
                     <div class="card mb-8">
                         <div class="card__header">
-                            <h2>Add New Segment</h2>
+                            <h2 id="segmentFormTitle">Add New Segment</h2>
+                            <input type="hidden" id="editingSegmentId" value="">
                         </div>
                         <div class="card__body">
                             <form id="segmentForm" class="segment-form">
+                                <h3 id="segmentFormTitle" class="form-title">Add New Segment</h3>
+                        
+                                <div class="form-group">
+                                    <label for="videoUrl">YouTube Video URL</label>
+                                    <input type="text" id="videoUrl" name="videoUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required>
+                                </div>
+                        
+                                <div class="form-group">
+                                    <label for="segmentName">Segment Name</label>
+                                    <input type="text" id="segmentName" name="segmentName" class="form-control" placeholder="e.g., Epic Guitar Solo" required>
+                                </div>
+                        
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label class="form-label" for="videoUrl">YouTube URL</label>
-                                        <input type="url" id="videoUrl" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required>
+                                        <label for="startTime">Start Time</label>
+                                        <input type="text" id="startTime" name="startTime" class="form-control" placeholder="e.g., 1:23 or 83" required>
+                                        <div class="form-hint">Format: MM:SS or seconds</div>
+                                    </div>
+                            
+                                    <div class="form-group">
+                                        <label for="endTime">End Time</label>
+                                        <input type="text" id="endTime" name="endTime" class="form-control" placeholder="e.g., 2:45 or 165" required>
+                                        <div class="form-hint">Format: MM:SS or seconds</div>
                                     </div>
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label class="form-label" for="segmentName">Segment Name</label>
-                                        <input type="text" id="segmentName" class="form-control" placeholder="My awesome segment" required>
-                                    </div>
+                        
+                                <div class="form-actions">
+                                    <button type="submit" id="submitSegmentBtn" class="btn btn--primary">Add Segment</button>
+                                    <button type="button" id="cancelEditBtn" class="btn btn--outline" style="display: none;" onclick="app.cancelEdit()">Cancel</button>
                                 </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label class="form-label" for="startTime">Start Time (seconds)</label>
-                                        <input type="number" id="startTime" class="form-control" min="0" placeholder="30" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label" for="endTime">End Time (seconds)</label>
-                                        <input type="number" id="endTime" class="form-control" min="1" placeholder="90" required>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn--primary">Save Segment</button>
                             </form>
                         </div>
                     </div>
@@ -105,6 +111,31 @@
                                 <div class="empty-state">
                                     <p>No segments saved yet. Add your first segment above!</p>
                                 </div>
+                                <template>
+                                    <div class="segment-item">
+                                        <div class="segment-info">
+                                            <h3 class="segment-name">{{name}}</h3>
+                                            <p class="segment-description">{{description}}</p>
+                                        </div>
+                                        <div class="segment-actions">
+                                            <button class="btn btn--icon btn--sm btn--play" data-segment-id="{{id}}" title="Play">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            <button class="btn btn--icon btn--sm btn--edit" data-segment-id="{{id}}" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn--icon btn--sm btn--delete" data-segment-id="{{id}}" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <button class="btn btn--icon btn--sm btn--share" data-segment-id="{{id}}" title="Share">
+                                                <i class="fas fa-share-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                            <div id="loadMoreContainer" class="load-more-container" style="display: none; text-align: center; margin-top: 20px;">
+                                <button id="loadMoreBtn" class="btn btn--outline">Load More Segments</button>
                             </div>
                         </div>
                     </div>
@@ -115,21 +146,30 @@
                     <!-- Create Playlist Form -->
                     <div class="card mb-8">
                         <div class="card__header">
-                            <h2>Create New Playlist</h2>
-                        </div>
-                        <div class="card__body">
                             <form id="playlistForm" class="playlist-form">
+                                <h3 id="playlistFormTitle" class="form-title">Create New Playlist</h3>
+                        
                                 <div class="form-group">
-                                    <label class="form-label" for="playlistName">Playlist Name</label>
-                                    <input type="text" id="playlistName" class="form-control" placeholder="My awesome playlist" required>
+                                    <label for="playlistName">Playlist Name</label>
+                                    <input type="text" id="playlistName" name="playlistName" class="form-control" placeholder="My Awesome Playlist" required>
                                 </div>
+                        
                                 <div class="form-group">
-                                    <label class="form-label">Select Segments</label>
+                                    <label for="playlistDescription">Description (Optional)</label>
+                                    <textarea id="playlistDescription" name="playlistDescription" class="form-control" rows="2" placeholder="Add a description..."></textarea>
+                                </div>
+                        
+                                <div class="form-group">
+                                    <label>Select Segments</label>
                                     <div id="segmentSelection" class="segment-selection">
                                         <p class="text-secondary">No segments available. Create some segments first!</p>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn--primary">Create Playlist</button>
+                        
+                                <div class="form-actions">
+                                    <button type="submit" id="submitPlaylistBtn" class="btn btn--primary">Create Playlist</button>
+                                    <button type="button" id="cancelPlaylistEditBtn" class="btn btn--outline" style="display: none;" onclick="app.cancelPlaylistEdit()">Cancel</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -191,6 +231,8 @@
                         <h4>Data Management</h4>
                         <div class="data-actions">
                             <button id="backupData" class="btn btn--secondary">Backup All Data</button>
+                            <input type="file" id="importDataFile" accept=".json" style="display: none;">
+                            <button id="importDataBtn" class="btn btn--outline">Import Data</button>
                             <button id="clearData" class="btn btn--outline">Clear All Data</button>
                         </div>
                     </div>
